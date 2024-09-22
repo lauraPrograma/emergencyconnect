@@ -1,145 +1,107 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário</title>
     <style>
         /* Estilos gerais */
         body {
             font-family: Arial, sans-serif;
+            background-color: #fff;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Estilos específicos para o formulário de login */
+        /* Container do formulário */
         form {
             background-color: #f7f7f7;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-control {
+            border-radius: 8px;
+            padding: 30px;
             width: 100%;
-            padding: 10px;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos para os campos do formulário */
+        form div {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
             font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 2px solid #cc0000;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
 
-        .text-center {
-            text-align: center;
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #ff0000;
         }
 
-        button[type="submit"] {
-            background-color: #4CAF50;
+        /* Estilos para o botão */
+        button {
+            width: 100%;
+            background-color: #cc0000;
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        button[type="submit"]:hover {
-            background-color: #45a049;
+        button:hover {
+            background-color: #ff0000;
         }
 
-        /* Estilos para mensagens */
-        .loading,
-        .error-message,
-        .sent-message {
-            margin-top: 10px;
-            display: none;
-            text-align: center;
-        }
-
-        .loading {
-            color: #4CAF50;
-        }
-
-        .error-message {
-            color: #d9534f;
-        }
-
-        .sent-message {
-            color: #4CAF50;
+        /* Estilos para os rótulos dos campos */
+        div {
+            font-size: 16px;
+            color: #cc0000;
         }
     </style>
 </head>
 <body>
-<section id="contact" class="contact section-bg">
-    <div class="container" data-aos="fade-up">
-        <div class="row">
-            <div class="col-lg-6">
-                <form role="form" class="php-email-form" method="POST">
-                    <div class="form-group mt-3">
-                        <input type="text" class="form-control" name="name" id="subject" placeholder="Seu nome" value="" required>
-                    </div>
-                    <div class="form-group mt-3">
-                        <input type="text" id="email" class="form-control" name="email" id="subject" placeholder="Seu email" value="" required>
-                    </div>
-                    <div class="form-group mt-3">
-                        <input type="password" class="form-control" name="password" id="subject" placeholder="Sua senha" value="" required>
-                    </div>
-                    <div class="my-3">
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message"></div>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit">Enviar</button>
-                    </div>
-                    <div class="response">
-                        <a href="<?= url("/")?>"> voltar</a></br>
-                        <a href="<?= url("/login")?>"> Faça seu login!</a></br>
-                    </div>
-                </form>
-            </div>
-        </div>
+<form>
+    <div>
+        Nome: <input name="name" type="text">
     </div>
-</section>
-
+    <div>
+        E-mail: <input name="email" type="text">
+    </div>
+    <div>
+        Senha: <input name="password" type="password">
+    </div>
+    <div>
+        <button>Enviar</button>
+    </div>
+</form>
 <script type="text/javascript" async>
-    const form = document.querySelector(".php-email-form");
-    const email = document.querySelector("#email");
-
+    const form = document.querySelector("form");
+    const headers = {
+        email: "fabiosantos@ifsul.edu.br",
+        password: "12345678"
+    };
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        const nameInput = document.querySelector('input[name="name"]');
-        const emailInput = document.querySelector('input[name="email"]');
-        const passwordInput = document.querySelector('input[name="password"]');
-
-        const name = nameInput.value;
-        const email = emailInput.value;
-        const password = passwordInput.value;
-
-        // Adicionando logs para depuração
-        console.log("Dados do formulário:");
-        console.log("Nome:", name);
-        console.log("Email:", email);
-        console.log("Senha:", password);
-
-        // Verifique se todos os campos estão preenchidos
-        if (name === "" || email === "" || password === "") {
-            const errorMessageDiv = document.querySelector(".error-message");
-            errorMessageDiv.textContent = "Por favor, preencha todos os campos.";
-            errorMessageDiv.style.display = "block";
-            return;
-        }
-
-        // Restante do código para enviar os dados para o servidor
-        console.log("Enviando dados para o servidor...");
-        // Aqui pode ser feito o fetch ou AJAX para enviar os dados
+        const data = await fetch(`<?= url("api/user");?>`,{
+            method: "POST",
+            body: new FormData(form),
+            headers: headers
+        });
+        const user = await data.json();
+        console.log(user.success.user);
     });
 </script>
 </body>

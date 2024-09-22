@@ -24,6 +24,7 @@
                     <a href="<?= url("contato"); ?>">Contato</a>
                     <a href="<?= url("localizacao"); ?>">Localização</a>
                     <a href="<?= url("faqs"); ?>">FAQs</a>
+                    <a href="<?= url("register"); ?>">Cadastro</a>
                     <a href="<?= url("login"); ?>">Entrar</a>
                 </li>
             </ul>
