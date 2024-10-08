@@ -86,46 +86,43 @@ class User extends Model {
     }
 
     public function insert(): ?int
-{
-    $conn = Connect::getInstance();
+    {
 
-    // Validação do email
-    if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-        $this->message = "E-mail Inválido!";
-        return false;
-    }
+        $conn = Connect::getInstance();
 
-    // Verificar se o email já existe
-    $query = "SELECT * FROM users WHERE email = :email";
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(":email", $this->email);
-    $stmt->execute();
+        if(!filter_var($this->email,FILTER_VALIDATE_EMAIL)){
+            $this->message = "E-mail Inválido!";
+            return false;
+        }
 
-    if ($stmt->rowCount() > 0) {
-        $this->message = "E-mail já cadastrado!";
-        return false;
-    }
-
-    // Hash da senha
-    $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-
-    // Inserir dados no banco
-    $query = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(":name", $this->name);
-    $stmt->bindParam(":email", $this->email);
-    $stmt->bindParam(":password", $this->password);
-
-    try {
+        $query = "SELECT * FROM users WHERE email LIKE :email";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(":email", $this->email);
         $stmt->execute();
-        echo "Usuário cadastrado com sucesso!";
-        return $conn->lastInsertId();
-    } catch (PDOException $e) {
-        echo "Erro ao inserir no banco de dados: " . $e->getMessage();
-        return false;
-    }
-}
 
+        if($stmt->rowCount() == 1) {
+            $this->message = "E-mail já cadastrado!";
+            return false;
+        }
+
+        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+
+        $query = "INSERT INTO users (name, email, password) 
+                  VALUES (:name, :email, :password)";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(":name", $this->name);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":password", $this->password);
+
+        try {
+            $stmt->execute();
+            return $conn->lastInsertId();
+        } catch (PDOException) {
+            $this->message = "Por favor, informe todos os campos!";
+            return false;
+        }
+    }
 
     public function login(string $email, string $password): bool
     {

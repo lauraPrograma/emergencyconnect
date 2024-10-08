@@ -1,50 +1,52 @@
-import {getBackendUrl, getBackendUrlApi, showToast} from "./../_shared/functions.js";
+import {
+    getBackendUrl,
+    getBackendUrlApi,
+    getFirstName
+} from "./../_shared/functions.js";
 
-const formRegister = document.querySelector("#formRegister");
-
-formRegister.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    try {
-        const response = await fetch(getBackendUrlApi("users"), {
-            
-            method: "POST",
-            body: new FormData(formRegister)
-        });
-        console.log('resposta');
-        const data = await response.json();
-        if (response.ok) {
-            showToast(data.message);
-        } else {
-            showToast("Erro no registro: " + data.message);
-        }
-    } catch (error) {
-        showToast("Erro ao tentar se registrar.");
-        console.error("Erro no registro:", error);
-    }
-});
 
 const formLogin = document.querySelector("#formLogin");
+const messageDiv = document.querySelector("#message");  // Captura o elemento de mensagem
 
 formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
-    try {
-        const response = await fetch(getBackendUrlApi("users/login"), {
-            method: "POST",
-            body: new FormData(formLogin)
-        });
+    
+    // Limpa mensagens anteriores
+    messageDiv.style.display = "none";
+    messageDiv.textContent = "";
+    messageDiv.style.color = ""; // Reseta a cor
 
-        const data = await response.json();
-        if (response.ok && data.type !== "error") {
-            localStorage.setItem("userAuth", JSON.stringify(data.user));
-            showToast(`Olá, ${data.user.name} como vai!`);
-            setTimeout(() => {
-                window.location.href = getBackendUrl("app");
-            }, 3000);
-        } else {
-            showToast(data.message || "Erro ao tentar logar.");
+    fetch(getBackendUrlApi("users/login"), {
+        method: "POST",
+        body: new FormData(formLogin)
+    })
+    .then(response => response.json())  // Parseia automaticamente o JSON da resposta
+    .then((data) => {
+        console.log(data);  // Exibe o dado retornado no console para verificar
+
+        if (data.type === "error") {  // Se for erro
+            // Exibe mensagem de erro na div com cor vermelha
+            messageDiv.style.display = "block";  // Exibe a mensagem
+            messageDiv.textContent = data.message;  // Mostra o texto de erro
+            messageDiv.style.color = "#cc0000";  // Define a cor vermelha
+            return;
         }
-    } catch (error) {
-        showToast("Erro ao tentar logar.");
-        console.error("Erro no login:", error);
-    }
+
+        // Sucesso: Exibe mensagem de boas-vindas
+        localStorage.setItem("userAuth", JSON.stringify(data.user));
+        messageDiv.style.display = "block";
+        messageDiv.textContent = `Olá, ${getFirstName(data.user.name)} como vai!`;  // Exibe mensagem de sucesso
+        messageDiv.style.color = "#28a745";  // Define a cor verde
+
+        setTimeout(() => {
+            window.location.href = getBackendUrl("app");
+        }, 3000);
+    })
+    .catch((error) => {
+        console.error("Erro:", error);
+        // Exibe mensagem de erro genérica em caso de falha na requisição
+        messageDiv.style.display = "block";
+        messageDiv.textContent = "Erro inesperado. Tente novamente mais tarde.";  // Mensagem genérica em caso de erro
+        messageDiv.style.color = "#cc0000";  // Define a cor vermelha
+    });
 });
